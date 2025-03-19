@@ -1,0 +1,6 @@
+#Ignore All torrent files
+*.torrent
+
+#ignore snapshots folder
+
+snapshots
