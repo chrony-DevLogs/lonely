@@ -1,6 +1,7 @@
 package tparse_test
 
 import (
+	"fmt"
 	"lonely/tparse"
 	"os"
 	"testing"
@@ -156,6 +157,80 @@ func TestOpen(t *testing.T) {
 	}
 }
 
-// func TestParseMagnetQuery(t *testing.T) {
-// 	//
-// }
+func TestParseMagnetQuery(t *testing.T) {
+	type testCase struct {
+		// Input Parms
+		magnet string
+
+		//Expected Values
+		expected      map[string]string
+		expectedError error
+	}
+
+	tests := []testCase{
+		{
+			magnet: "magnet:?xt=urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12&dn=example_file_1.txt&tr=http://tracker.example.com/announce",
+			expected: map[string]string{
+				"dn": "example_file_1.txt",
+				"tr": "http://tracker.example.com/announce",
+				"xt": "urn:btih:a1b2c3d4e5f67890abcdef1234567890abcdef12",
+			},
+			expectedError: nil,
+		},
+		{
+			magnet: "magnet:?xt=urn:btih:b2c3d4e5f67890abcdef1234567890abcdef1234&dn=example_file_2.bin&tr=http://tracker.test.com/announce",
+			expected: map[string]string{
+				"dn": "example_file_2.bin",
+				"tr": "http://tracker.test.com/announce",
+				"xt": "urn:btih:b2c3d4e5f67890abcdef1234567890abcdef1234",
+			},
+			expectedError: nil,
+		},
+		{
+			magnet: "magnet:?xt=urn:btih:c3d4e5f67890abcdef1234567890abcdef123456&dn=example_file_3.iso&tr=http://tracker.torrents.com/announce",
+			expected: map[string]string{
+				"dn": "example_file_3.iso",
+				"tr": "http://tracker.torrents.com/announce",
+				"xt": "urn:btih:c3d4e5f67890abcdef1234567890abcdef123456",
+			},
+			expectedError: nil,
+		},
+		{
+			magnet: "xt=urn:btih:d4e5f67890abcdef1234567890abcdef12345678&dn=example_file_4.mp4&tr=http://tracker.speed.net/announce",
+			expected: map[string]string{
+				"dn": "example_file_3.iso",
+				"tr": "http://tracker.torrents.com/announce",
+				"xt": "urn:btih:c3d4e5f67890abcdef1234567890abcdef123456",
+			},
+			expectedError: fmt.Errorf("error not a magnet link"),
+		},
+		{
+			magnet: "magnet:?xt=urn:btih:e5f67890abcdef1234567890abcdef1234567890&dn=example_file_5.pdf&tr=http://tracker.fasttrack.org/announce",
+			expected: map[string]string{
+				"dn": "example_file_5.pdf",
+				"tr": "http://tracker.fasttrack.org/announce",
+				"xt": "urn:btih:e5f67890abcdef1234567890abcdef1234567890",
+			},
+			expectedError: nil,
+		},
+	}
+
+	for _, test := range tests {
+		// Call the function that processes the magnet link, which might return an error
+		actual, err := tparse.ParseMagnetQuery(test.magnet)
+
+		// If error is expected
+		if test.expectedError != nil {
+			// Assert that an error is returned
+			assert.Error(t, err)
+			// Assert that the error matches the expected error
+			assert.EqualError(t, err, test.expectedError.Error())
+		} else {
+			// If no error is expected, assert that no error is returned
+			assert.NoError(t, err)
+
+			// Assert that the parsed values match the expected ones
+			assert.Equal(t, test.expected, actual)
+		}
+	}
+}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"lonely/tparse"
 )
 
@@ -50,18 +51,10 @@ func main() {
 
 	// Step 1: Open the binary file for reading
 
-	f, err := tparse.ReadTorrentFile("tparse/test_torrent_files/f1.torrent")
-
+	d, err := tparse.ParseMagnetQuery("magnet:?xt=urn:btih:c3d4e5f67890abcdef1234567890abcdef123456&dn=example_file_3.iso&tr=http://tracker.torrents.com/announce")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
-	torrentFile, err := tparse.Open(f)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(torrentFile)
-
+	fmt.Print(d)
 }
