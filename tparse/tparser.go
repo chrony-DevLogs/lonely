@@ -20,18 +20,18 @@ import (
 // 	Info     bencodeInfo `bencode:"info"`
 // }
 
-func Open(torrentData []byte) (*map[string]any, error) { // parse a torrent file into a map
+func Open(torrentData []byte) (map[string]any, error) { // parse a torrent file into a map
 	var bto map[string]any
 
 	err := bencode.DecodeBytes(torrentData, &bto)
 	if err != nil {
 		return nil, err
 	}
-	return &bto, nil
+	return bto, nil
 }
 
-func ReadTorrentFile(fileName string) ([]byte, error) { // open a torrent file using the os FS
-	data, err := os.ReadFile(fileName)
+func ReadTorrentFile(filePath string) ([]byte, error) { // open a torrent file using the os FS
+	data, err := os.ReadFile(filePath)
 
 	if err != nil {
 		return nil, fmt.Errorf("reading file err: %w", err)
