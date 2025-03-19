@@ -21,20 +21,47 @@ func main() {
 
 	// read from eleps.torrent
 
-	data, err := tparse.ReadTorrentFile("torrentFiles/sleepingDogs.torrent")
+	// fileNumber := "5"
+
+	// data, err := tparse.ReadTorrentFile("tparse/test_torrent_files/f" + fileNumber + ".torrent")
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// torretfile, err := tparse.Open(data)
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// file, err := os.Create("tparse/test_torrent_files/" + fileNumber + "Expected")
+	// if err != nil {
+	// 	log.Fatalf("Error creating file: %v", err)
+	// }
+	// defer file.Close()
+
+	// encoder := gob.NewEncoder(file)
+	// err = encoder.Encode(torretfile)
+	// if err != nil {
+	// 	log.Fatalf("Error encoding data: %v", err)
+	// }
+	// fmt.Println("Data written to file successfully in binary format!")
+
+	// Step 1: Open the binary file for reading
+
+	f, err := tparse.ReadTorrentFile("tparse/test_torrent_files/f1.torrent")
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	torrentFile, err := tparse.Open(data)
+	torrentFile, err := tparse.Open(f)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	torretfile := torrentFile
-
-	fmt.Println(torretfile)
+	fmt.Println(torrentFile)
 
 }

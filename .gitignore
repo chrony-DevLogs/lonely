@@ -1,5 +1,5 @@
-#Ignore All torrent files
-*.torrent
+#Ignore elligal torrent files
+*torrentFiles
 
 #ignore snapshots folder
 
