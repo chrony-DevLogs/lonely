@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/zeebo/bencode"
@@ -33,6 +34,27 @@ type TorrentFile struct {
 	Name        string
 }
 
+func (t *TorrentFile) buildTrackerUrl(peerID [20]byte, port uint) (string, error) {
+	base, err := url.Parse(t.Announce)
+
+	if err != nil {
+		return "", err
+	}
+
+	queries := url.Values{
+		"info_hash":  []string{string(t.InfoHash[:])},
+		"peer_id":    []string{string(peerID[:])},
+		"port":       []string{strconv.Itoa(int(port))},
+		"uploaded":   []string{"0"},
+		"downloaded": []string{"0"},
+		"compact":    []string{"1"},
+		"left":       []string{strconv.Itoa(t.Length)},
+	}
+
+	base.RawQuery = queries.Encode()
+	return base.String(), nil
+}
+
 func (i *BencodeInfo) hash() [20]byte {
 
 	buf, err := bencode.EncodeBytes(i)
@@ -44,7 +66,7 @@ func (i *BencodeInfo) hash() [20]byte {
 	return h
 }
 
-func resaulveSHA1pices(bto *BencodeTorrent) [][20]byte {
+func resolveSHA1Pieces(bto *BencodeTorrent) [][20]byte {
 	const sah1Size = 20
 	numberOfPieces := len(bto.Info.Pieces) / sah1Size
 
@@ -67,11 +89,10 @@ func (bto *BencodeTorrent) ToTorrentFile() (TorrentFile, error) {
 
 	torrentFile.Announce = bto.Announce
 	torrentFile.InfoHash = bto.Info.hash()
-	torrentFile.PieceHashes = resaulveSHA1pices(bto)
+	torrentFile.PieceHashes = resolveSHA1Pieces(bto)
 	torrentFile.PieceLength = bto.Info.Length
 	torrentFile.Length = bto.Info.Length
 	torrentFile.Name = bto.Info.Name
-
 	return torrentFile, nil
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"lonely/project"
 	"lonely/tparse"
 )
 
@@ -16,5 +17,13 @@ func main() {
 	file, err := bto.ToTorrentFile()
 
 	fmt.Println(file.InfoHash)
+
+	p, err := project.GetProjectData()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(p)
 
 }
