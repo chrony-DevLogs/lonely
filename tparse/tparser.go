@@ -1,8 +1,10 @@
 package tparse
 
 import (
+	"crypto/sha1"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -20,6 +22,57 @@ type BencodeInfo struct {
 type BencodeTorrent struct {
 	Announce string      `bencode:"announce"`
 	Info     BencodeInfo `bencode:"info"`
+}
+
+type TorrentFile struct {
+	Announce    string
+	InfoHash    [20]byte
+	PieceHashes [][20]byte
+	PieceLength int
+	Length      int
+	Name        string
+}
+
+func (i *BencodeInfo) hash() [20]byte {
+
+	buf, err := bencode.EncodeBytes(i)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	h := sha1.Sum(buf)
+	return h
+}
+
+func resaulveSHA1pices(bto *BencodeTorrent) [][20]byte {
+	const sah1Size = 20
+	numberOfPieces := len(bto.Info.Pieces) / sah1Size
+
+	pieces := make([][20]byte, 0, numberOfPieces)
+
+	for i := 0; i < numberOfPieces; i++ {
+		var sh1 [20]byte
+		for j := i * 20; j < 20*(i+1); j++ {
+			sh1[j%20] = bto.Info.Pieces[j]
+		}
+		pieces = append(pieces, sh1)
+	}
+
+	return pieces
+}
+
+func (bto *BencodeTorrent) ToTorrentFile() (TorrentFile, error) {
+
+	torrentFile := TorrentFile{}
+
+	torrentFile.Announce = bto.Announce
+	torrentFile.InfoHash = bto.Info.hash()
+	torrentFile.PieceHashes = resaulveSHA1pices(bto)
+	torrentFile.PieceLength = bto.Info.Length
+	torrentFile.Length = bto.Info.Length
+	torrentFile.Name = bto.Info.Name
+
+	return torrentFile, nil
 }
 
 func Open(torrentData []byte) (*BencodeTorrent, error) { // parse a torrent file into a map
